@@ -65,10 +65,10 @@ pub fn build(b: *std.Build) void {
         "-Wconversion", // Warns on implicit conversion that may result in data loss
         "-Wfloat-equal", // Warns when floating point types are compared for in/equality
         "-Wmismatched-tags", // Warns against previous declarations
-        "-Wnon-virtual-dtor", // = "-Weffc++", class has virtual functions but non-virtual destructor
+        "-Wnon-virtual-dtor", // == "-Weffc++": Warns when class has virtual functions but non-virtual destructor
         "-Wshadow-all", // Warns when a declaration shadows anything else
-        "-Wstrict-prototypes", // Warns on f() rather than f(void)
-        "-Wvla", // Warns when using variable-length arrays
+        "-Wstrict-prototypes", // Warns on f() rather than f(void) for C projects
+        "-Wvla", // Warns when using C99 variable-length arrays
         "-Wsign-conversion", // Warns on sign conversion
         "-Wunsafe-buffer-usage", // Warns when a buffer operation is done on a raw pointer
         "-Wunused", // Warns on unused variables, functions etc.
@@ -78,7 +78,7 @@ pub fn build(b: *std.Build) void {
         // Sanitizers / Hardeners
         "-fsanitize=undefined", // UB Sanitizer
         "-fsanitize-trap", // UB Sanitizer handles UB by trapping
-        "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG", // libc++ hardening mode
+        "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST", // libc++ hardening mode. Change to _DEBUG for debug builds
         "-ftrivial-auto-var-init=pattern", // Overwrites uninitialized memory with a pattern
         "-pedantic-errors", // Reject all forbidden compiler extensions
 
@@ -87,7 +87,7 @@ pub fn build(b: *std.Build) void {
         "-fno-rtti", // Disables runtime type info
 
         // Useful flags
-        "-ftrapv", // Treat signed integer overflow as two’s complement (wraps around)
+        "-fwrapv", // Treat signed integer overflow as two’s complement (wraps around)
         "-fstrict-enums", // Enable optimizations based on the strict definition of an enum’s value range
         "-ftime-trace", // Outputs a Chrome Tracing .json object containing a compiler performance report
 
@@ -114,12 +114,13 @@ pub fn build(b: *std.Build) void {
     // Add include paths (one path per folder containing a #include)
     exe.addIncludePath(b.path("include/"));
 
-    // Link libraries and add .c and .cpp files with compiler flags
+    // Link libraries
     // exe.linkLibC(); // when appropriate
     exe.linkLibCpp();
     exe.linkLibrary(lib);
     // exe.linkSystemLibrary("SDL3"); // when appropriate
 
+    // Add .c and .cpp files along with specified compiler flags
     exe.addCSourceFiles(.{
         .files = &exe_files,
         .flags = &exe_flags,

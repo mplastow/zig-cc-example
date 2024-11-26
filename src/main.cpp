@@ -1,6 +1,7 @@
-// NOTE(matt): would be nice to replace this with <print> once I can get
-//              system headers for g++-13 (-14?)
+// zig-cpp-example - main.cpp
+
 #include <iostream>
+#include <print>
 
 // Dependencies
 #include <lib.hpp>
@@ -9,7 +10,7 @@ int main(int argc, char** argv)
 {
     // code goes here
 
-    std::cout << "factorial(5) = " << lib::factorial(5) << std::endl;
+    std::println("factorial(5) = {}", lib::factorial(5));
 
     return 0;
 }
