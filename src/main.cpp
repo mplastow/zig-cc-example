@@ -1,6 +1,5 @@
 // zig-cpp-example - main.cpp
 
-#include <iostream>
 #include <print>
 
 // Dependencies
