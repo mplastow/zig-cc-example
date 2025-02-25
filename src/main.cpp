@@ -1,9 +1,11 @@
 // zig-cpp-example - main.cpp
 
-#include <print>
-
-// Dependencies
+// Local dependency headers
 #include <lib.hpp>
+
+// C++ Standard Library
+#include <format>
+#include <print>
 
 int main(int argc, char** argv)
 {

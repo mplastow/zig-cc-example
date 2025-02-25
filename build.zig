@@ -16,7 +16,7 @@ pub fn build(b: *std.Build) void {
     const lib = b.addStaticLibrary(.{
         .name = "factorial",
         .target = target,
-        .optimize = .ReleaseFast,
+        .optimize = .Debug,
     });
 
     lib.addCSourceFiles(.{
@@ -52,8 +52,9 @@ pub fn build(b: *std.Build) void {
     const exe_flags = [_][]const u8{
         // Standards and optimization flags
         "-std=c++23", // C++ 23
+        "-g", // Include debug information in binary
         "-ggdb3", // Maximizes debug information
-        "-Og", // Optimization level: g = debug, s = size, 3 = maximum
+        "-Og", // Optimization level: Og = debug, Os = size, O3 = maximum
 
         // Warning flags
         "-Wall", // Reasonable default warnings
@@ -68,6 +69,7 @@ pub fn build(b: *std.Build) void {
         "-Wnon-virtual-dtor", // == "-Weffc++": Warns when class has virtual functions but non-virtual destructor
         "-Wshadow-all", // Warns when a declaration shadows anything else
         "-Wstrict-prototypes", // Warns on f() rather than f(void) for C projects
+        "-Wthread-safety", // Warns on potential race conditions across threads
         "-Wvla", // Warns when using C99 variable-length arrays
         "-Wsign-conversion", // Warns on sign conversion
         "-Wunsafe-buffer-usage", // Warns when a buffer operation is done on a raw pointer
@@ -76,19 +78,22 @@ pub fn build(b: *std.Build) void {
         "-Wunused-template", // Warns on unused templates
 
         // Sanitizers / Hardeners
-        "-fsanitize=undefined", // UB Sanitizer
-        "-fsanitize-trap", // UB Sanitizer handles UB by trapping
-        "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST", // libc++ hardening mode. Change to _DEBUG for debug builds
+        "-fsanitize=undefined,bounds,implicit-conversion,nullability,unsigned-integer-overflow", // UB Sanitizer
+        "-fsanitize-trap=undefined,bounds,implicit-conversion,nullability,unsigned-integer-overflow", // UB Sanitizer handles UB by trapping
+        "-fno-omit-frame-pointer", // Must be set (along with -g) to get proper debug information in the binary
+        "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG", // libc++ hardening mode. Note: possibly? inferred by zig cc from -Ox and -fsanitize=undefined flags
         "-ftrivial-auto-var-init=pattern", // Overwrites uninitialized memory with a pattern
-        "-pedantic-errors", // Reject all forbidden compiler extensions
+        "-pedantic-errors", // "Reject all forbidden compiler extensions." Also appears to always turn -Wpendantic warnings into errors.
 
         // Dialect flags
         "-fno-exceptions", // Disables exception handling
-        "-fno-rtti", // Disables runtime type info
+        // "-fno-rtti", // Disables runtime type info (commented-out here because it may be incompatible with a UBSan feature)
 
         // Useful flags
-        "-fwrapv", // Treat signed integer overflow as two’s complement (wraps around)
-        "-fstrict-enums", // Enable optimizations based on the strict definition of an enum’s value range
+        "-ftrapv", // Traps on signed integer overflow (to be consistent with UBSan). Set either this or "-fwrapv"
+        // "-fwrapv", // Treats signed integer overflow as two’s complement (wraps around). Set either this or "-ftrapv"
+        "-fstrict-aliasing", // Enables optimizations based on the assumption of strict aliasing
+        "-fstrict-enums", // Enables optimizations based on the strict definition of an enum’s value range
         "-ftime-trace", // Outputs a Chrome Tracing .json object containing a compiler performance report
 
         // // Flags to DISABLE warnings -- for use with -Werror

@@ -1,4 +1,4 @@
-## Motivation
+## Description
 This project contains an example of a C++ project that has the following features:
 - Structures all files according to my current best-practices structure and layout
     - main() with cli flag input
@@ -9,16 +9,15 @@ This project contains an example of a C++ project that has the following feature
     - Header guards
     - Dependencies declared only where needed (multiple t.u.'s instead of a s.t.u.b.)
 - Includes an example first-party library (lib.cpp) that implements a single factorial() function
-- Formats any C++ code or header file using Webkit style
-- Intellisense uses g++-12
+- Formats any C++ code or header file using WebKit style
+- IntelliSense uses clang++-21 with `-stdlib=libc++`
 - Builds with F5 key in VS Code
 - Uses `zig cc` via `build.zig` using `std=C++23` and tons of flags for safety
 
 # Todo
-- Write a sample class hierarchy with dependency injection
-- Write a sample use of std::pmr
+- Write a sample use of std::pmr with allocator-aware types
 - Build separate translation units to take full advantage of `zig cc` caching
-- Include the Tracy profiler and the doctest framework (and any other third-party libraries in current use)
+- Integrate the Tracy profiler and the Gtest framework (and any other third-party libraries in current use)
 
 ## Usage
 - Copy everything except .zig-cache and .zig-out into a new directory to start a C++ project.
