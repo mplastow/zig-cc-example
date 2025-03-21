@@ -9,7 +9,7 @@
             "cStandard": "c23",
             "cppStandard": "c++23",
             "intelliSenseMode": "linux-clang-x64",
-            "compilerPath": "/usr/bin/clang++-21",
+            "compilerPath": "/usr/bin/clang++",
             "compilerArgs": [
                 "-stdlib=libc++"
             ]
