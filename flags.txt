@@ -1,0 +1,121 @@
+Lots of compiler flags for clang and gcc
+
+// // Standards and optimization flags
+"-std=c++23", // C++ 23
+"-g", // Include debug information in binary
+"-ggdb3", // Maximizes debug information
+"-O3", // Optimization level: Og = debug, Os = size, O2 = good, O3 = maximum
+
+// // Warning flags
+"-Wall", // Reasonable default warnings
+"-Wextra", // More reasonable default warnings
+"-Wpedantic", // Enforces ISO C and C++, ensures portability
+// "-Weverything", // EVERY SINGLE WARNING. Introduces conflicts! Do not use!
+"-Walloca", // Warns on use of `alloca`
+"-Wcast-qual", // Warns when type qualifiers are cast away
+"-Wcast-align", // Warns when casts increase required alignment
+"-Wcomma", // clang: Warns on possible misuse of comma operator
+"-Wconversion", // Warns on implicit conversions that may result in data loss
+"-Wdelete-non-virtual-dtor", // Warns when `delete` is used to destroy an instance of a class that has virtual functions and non-virtual destructor
+"-Wdouble-promotion", // clang: Warns when implicit conversion increases floating-point precision
+"-Wenum-conversion", // Warns on implicit conversions and operations on enums
+"-Wextra-semi", // Warns about redundant semicolons
+"-Wfloat-equal", // Warns when floating point types are compared for in/equality
+"-Wmismatched-tags", // Warns against previous declarations
+"-Wmissing-braces", // Warns if an aggregate or union initializer is not fully bracketed
+"-Wnon-virtual-dtor", // == "-Weffc++": Warns when class has virtual functions but non-virtual destructor
+"-Wold-style-cast", // Warns on old C-style casts
+"-Woverloaded-virtual", // Warns when a function declaration hides virtual functions from a base class
+"-Wpointer-arith", // Warns on pointer arithmetic that is invalid or introduces UB
+"-Wrange-loop-analysis", // Warns when a range-based for loop creates an unnecessary copy
+"-Wrange-loop-construct", // Warns when a range-based for loop creates an unnecessary copy
+"-Wshadow", // gcc: Warns whenever a local variable or type declaration shadows another variable, parameter, type, class member
+"-Wshadow-all", // clang: Warns when a declaration shadows anything else
+"-Wsign-conversion", // Warns on sign conversion
+"-Wstrict-prototypes", // Warns on f() rather than f(void) for C projects
+"-Wthread-safety", // Warns on potential race conditions across threads
+"-Wuninitialized", // Warns when an object is used before being initialized
+"-Wunsafe-buffer-usage", // Warns when a buffer operation is done on a raw pointer
+"-Wunused", // Warns on unused variables, functions etc.
+"-Wunused-parameter", // Warns on unused parameters
+"-Wunused-template", // Warns on unused templates
+"-Wvla", // Warns on use of C99 variable-length arrays
+// // gcc flags
+// "-Wctor-dtor-privacy", // gcc: Warns when a class may be unusable because all ctors and dtors for are private
+// "-Wduplicated-branches", // gcc: Warns when an if-else has identical branches
+// "-Wduplicated-cond", // gcc: Warns about duplicated conditions in an if-else-if chain
+// "-Wjump-misses-init", // gcc: Warns when a jump from a goto statement is incompatible with C++
+// "-Wlogical-op", // gcc: Warns about suspicious uses of logical operators in expressions
+// "-Wmaybe-uninitialized", // gcc: Warns when an object is uninitialized in some paths that may be executed at run time
+// "-Wnoexcept", // gcc: Warns when `noexcept` evaluates to false because of a call to a non-`noexcept` function that is known to never throw an exception
+// "-Wrestrict", // gcc: Warns when an object referenced by a restrict-qualified parameter is aliased by another argument, or when copies between such objects overlap
+// "-Wstrict-null-sentinel", // gcc: Warns about the use of an uncasted NULL as sentinel
+// "-Wsuggest-attribute=format", // gcc: Warns about function pointers that might be candidates for `format` attributes
+// "-Wsuggest-attribute=malloc", // gcc: Warns for cases where adding an attribute to malloc() may be beneficial
+// Enabled by default in clang, but not gcc
+// "-Wformat=2", // Warns when arguments supplied to a format string have incorrec types or make bad conversions
+// "-Wformat-overflow", // Warns about calls to formatted I/O functions such as sprintf that might overflow the destination buffer
+// "-Wformat-signedness", // Warns when arguments supplied to a format string result in a sign conversion
+
+ // // Rule of 0/3/5/6
+"-Wdeprecated-copy", // Warns when user-declared copy ctor or operator= prevent implicit definition of the other one
+"-Wdeprecated-copy-dtor", // Warns when user-declared dtor prevents implicit definition of copy ctor and operator=
+"-Wdeprecated-implementations", // Warns when implementing deprecated or unavailable methods, classes, and categories
+
+// // Deprecated language features
+"-Wdeprecated", // Warns on use of deprecated C++ language features
+"-Wdeprecated-dynamic-exception-spec", // clang: Warns on dynamic exception specification. Part of -Wdeprecated.
+"-Wdeprecated-literal-operator", // Warns when an identifier is preceded by whitespace in a literal operator declaration. Part of -Wdeprecated.
+"-Wdeprecated-redundant-constexpr-static-def", // clang: Warns on out-of-line definition of constexpr static data member. Part of -Wdeprecated.
+"-Wwrite-strings", // Warn abouts the deprecated conversion from string literals to `char *`
+// gcc deprecation flags
+// "-Wcomma-subscript", // gcc: Warns on possible misuse of comma operator. Part of -Wdeprecated.
+// "-Wdeprecated-variadic-comma-omission", // gcc: Part of -Wdeprecated.
+// "-Wvolatile", // gcc: Warns on deprecated uses of `volatile`. Part of -Wdeprecated.
+
+// // Sanitizers / Hardeners
+// NOTE: Do not use the -fsanitize option "unsigned-integer-overflow". We should not be using unsigned integers
+//      except in situations where overflowing is desirable or mandated by the language!
+"-fsanitize=undefined,bounds,implicit-conversion,nullability", // UB Sanitizer
+"-fsanitize-trap=undefined,bounds,implicit-conversion,nullability", // UB Sanitizer handles UB by trapping
+"-fsafe-buffer-usage-suggestions", // "semi-automatically transform large bodies of code to follow the C++ Safe Buffers programming model"
+"-fno-omit-frame-pointer", // Must be set (along with -g) to get proper debug information in the binary. Can remove for release builds.
+"-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG", // libc++ hardening mode. Note: possibly? inferred by zig cc from -Ox and -fsanitize=undefined flags
+"-ftrivial-auto-var-init=pattern", // Overwrites uninitialized memory with a pattern
+"-pedantic-errors", // "Reject all forbidden compiler extensions." Also appears to always turn -Wpendantic warnings into errors.
+"-ftrapv", // Traps on signed integer overflow (to be consistent with UBSan). Set either this or "-fwrapv"
+// "-fwrapv", // Treats signed integer overflow as two’s complement (wraps around). Set either this or "-ftrapv"
+
+// // Optimizations (exploit assumption that UB cannot happen)
+"-fstrict-aliasing", // Enables optimizations based on the assumption of strict aliasing
+"-fstrict-enums", // Enables optimizations based on the strict definition of an enum’s value range
+"-fstrict-overflow", // Enables optimizations based on strict signed overflow rules
+"-fstrict-return", // Enables optimizations based on treating control flow paths that fall off the end of a non-void function as unreachable
+"-fstrict-vtable-pointers", // Enables optimizations based on the strict rules for overwriting polymorphic C++ objects
+
+// // Dialect flags
+// "-fno-exceptions", // Disables exception handling
+// "-fno-rtti", // Disables runtime type info (commented-out here because it may be incompatible with a UBSan feature)
+
+// // Useful flags
+// "-ftime-trace", // Outputs a Chrome Tracing .json object containing a compiler performance report
+// "-fextend-variable-liveness" // clang 20+: preserves the liveness of variables so that they are visible in a debugger more often
+
+// // Flags to DISABLE warnings -- for use with -Werror
+// "-Wno-cast-qual", // Disables warning when a pointer is cast so as to remove a type qualifier
+// "-Wno-conversion", // Disables warning on implicit conversion that may result in data loss
+// "-Wno-float-equal", // Disables warning when floating-point values used in equality comparisons
+// "-Wno-ignored-qualifiers", // Disables warning when return type of a function has a type qualifier
+// "-Wno-non-virtual-dtor", // Disables warning when class has virtual functions but non-virtual destructor
+// "-Wno-sign-compare", // Disables warning when a comparison between signed and unsigned values could produce an incorrect result
+// "-Wno-sign-conversion", // Disables warning on implicit conversion between un/signed
+// "-Wno-unused", // Disables warnings for unused variables, functions etc.
+// "-Wno-unused-parameter", // Disables unused parameter warnings
+// "-Wno-unused-template", // Disables unused template warnings
+
+// // Converts warnings into errors -- turn off when needed
+// "-Werror",
+// "-ferror-limit=0",
+
+// // Enable Tracy profiler
+// "-DTRACY_ENABLE",

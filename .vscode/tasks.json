@@ -18,6 +18,26 @@
                 "isDefault": true
             },
             "detail": "Build with `zig build`"
+        },
+        {
+            "type": "cppbuild",
+            "label": "zig build ccjson",
+            "command": "zig",
+            "args": [
+                "build",
+                "ccjson",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Build compiler_commands.json with `zig build ccjson`"
         }
     ],
     "version": "2.0.0"

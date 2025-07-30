@@ -1,14 +1,14 @@
-// lib.hpp
+// lib.hpp -- zig-cc-example
 
 #ifndef LIB_HPP
 #define LIB_HPP
 
 // Dependencies
-#include <type_aliases.hpp>
+#include <cstdint>
 
 namespace lib {
 
-i32 factorial(i32 n);
+auto factorial(int n) -> int64_t;
 
 }
 

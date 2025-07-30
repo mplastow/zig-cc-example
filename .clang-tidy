@@ -1,0 +1,36 @@
+---
+Checks: "*,
+        -abseil-*,
+        -altera-*,
+        -android-*,
+        -fuchsia-*,
+        -google-*,
+        -llvm*,
+        -modernize-use-trailing-return-type,
+        -zircon-*,
+        -readability-else-after-return,
+        -readability-static-accessed-through-instance,
+        -readability-avoid-const-params-in-decls,
+        -cppcoreguidelines-non-private-member-variables-in-classes,
+        -misc-non-private-member-variables-in-classes,
+        -hicpp-braces-around-statements,
+"
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+FormatStyle:     none
+
+CheckOptions:
+  # - key: readability-identifier-length.IgnoredVariableNames
+  #   value: 'a|b|e|f|g|h|i|j|k|m|n|u|v|x|y|z|op|el'
+  # - key: readability-identifier-length.IgnoredParameterNames
+  #   value: 'a|b|e|f|g|h|i|j|k|m|n|u|v|x|y|z|op|el'
+  - key: readability-identifier-length.MinimumVariableNameLength
+    value: '0'
+  - key: readability-identifier-length.MinimumParameterNameLength
+    value: '0'
+  - key: readability-identifier-length.MinimumLoopCounterNameLength
+    value: '0'
+  - key: readability-identifier-length.MinimumExceptionNameLength
+    value: '0'
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: '1'
