@@ -16,61 +16,21 @@ pub fn build(b: *std.Build) void {
     // Make a list of targets that have include files and C source files
     var targets = std.ArrayList(*std.Build.Step.Compile).init(b.allocator);
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Build and install a C++ library
-    //
-    const lib = b.addStaticLibrary(.{
-        .name = "factorial",
-        .target = target,
-        .optimize = .Debug,
-    });
-
-    targets.append(lib) catch @panic("OOM");
-
-    lib.addCSourceFiles(.{
-        .files = &.{
-            "lib/lib.cpp",
-        },
-        .flags = &.{
-            "-std=c++23",
-            "-O3",
-            // NOTE(matt): Use more flags for building real libraries
-        },
-    });
-    lib.addIncludePath(b.path("include/"));
-    lib.linkLibCpp();
-
-    b.installArtifact(lib);
-
-    ////////////////////////////////////////////////////////////////////////////
-    // Build executable
-    //
-    const exe = b.addExecutable(.{
-        .name = "prog",
-        .target = target,
-        .optimize = optimize,
-    });
-
-    targets.append(exe) catch @panic("OOM");
-
-    // Array of .c and .cpp filenames to pass to addCSourceFiles()
-    // #includes from any files listed here do not need to be added to this array
-    const exe_files = [_][]const u8{
-        "src/main.cpp",
-    };
     // Array of clang compiler flags to pass to addCSourceFiles()
-    const exe_flags = [_][]const u8{
+    const cpp_compiler_flags = [_][]const u8{
         // // Standards and optimization flags
-        "-std=c++23", // C++ 23
+        "-std=c++23", // Specify C++ standard
         "-g", // Include debug information in binary
         "-ggdb3", // Maximizes debug information
-        "-O3", // Optimization level: Og = debug, Os = size, O2 = good, O3 = maximum
+        "-O2", // Optimization level: Og = debug, Os = size, O2 = good, O3 = maximum
 
-        // // Warning flags
+        // // General warning flags
+        // "-Weverything", // EVERY SINGLE WARNING! Introduces conflicts! Do not use!
         "-Wall", // Reasonable default warnings
         "-Wextra", // More reasonable default warnings
         "-Wpedantic", // Enforces ISO C and C++, ensures portability
-        // "-Weverything", // EVERY SINGLE WARNING. Introduces conflicts! Do not use!
+
+        // Additional warning flags
         "-Walloca", // Warns on use of `alloca`
         "-Wcast-align", // Warns when casts increase required alignment
         "-Wcast-qual", // Warns when type qualifiers are cast away
@@ -90,28 +50,29 @@ pub fn build(b: *std.Build) void {
         "-Wunused-template", // Warns on unused templates
         "-Wvla", // Warns on use of C99 variable-length arrays
 
-        // // Rule of 0/3/5/6
+        // // Warning flags for the Rule of 0/3/5/6
         "-Wdeprecated-copy", // Warns when user-declared copy ctor or operator= prevent implicit definition of the other one
         "-Wdeprecated-copy-with-dtor", // Warns when user-declared dtor prevents implicit definition of copy ctor and operator=
         "-Wdeprecated-implementations", // Warns when implementing deprecated or unavailable methods, classes, and categories
 
-        // // Deprecated language features
+        // // Deprecated
         "-Wdeprecated", // Warns on use of deprecated C++ language features
 
-        // // Sanitizers / Hardeners
+        // // Sanitizers and hardeners
         // NOTE: Do not use the -fsanitize option "unsigned-integer-overflow". We should not be using unsigned integers
         //      except in situations where overflowing is desirable or mandated by the language!
+        "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG", // libc++ hardening mode. Note: possibly? inferred by zig cc from -Ox and -fsanitize=undefined flags
         "-fsanitize=undefined,bounds,implicit-conversion,nullability", // UB Sanitizer
         "-fsanitize-trap=undefined,bounds,implicit-conversion,nullability", // UB Sanitizer handles UB by trapping
-        "-fsafe-buffer-usage-suggestions", // "semi-automatically transform large bodies of code to follow the C++ Safe Buffers programming model"
         "-fno-omit-frame-pointer", // Must be set (along with -g) to get proper debug information in the binary. Can remove for release builds.
-        "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG", // libc++ hardening mode. Note: possibly? inferred by zig cc from -Ox and -fsanitize=undefined flags
+        "-fsafe-buffer-usage-suggestions", // "semi-automatically transform large bodies of code to follow the C++ Safe Buffers programming model"
         "-ftrivial-auto-var-init=pattern", // Overwrites uninitialized memory with a pattern
         "-ftrapv", // Traps on signed integer overflow (to be consistent with UBSan). Set either this or "-fwrapv"
         // "-fwrapv", // Treats signed integer overflow as two’s complement (wraps around). Set either this or "-ftrapv"
         "-pedantic-errors", // "Reject all forbidden compiler extensions." Also appears to always turn -Wpendantic warnings into errors.
 
-        // // Optimizations (exploit assumption that UB cannot happen in certain cases)
+        // // Optimizations
+        // // These flags enable optimizations that exploit the assumption that UB cannot happen in certain cases. Best used with UBSan.
         "-fstrict-aliasing", // Enables optimizations based on the assumption of strict aliasing
         "-fstrict-enums", // Enables optimizations based on the strict definition of an enum’s value range
         "-fstrict-overflow", // Enables optimizations based on strict signed overflow rules
@@ -131,8 +92,51 @@ pub fn build(b: *std.Build) void {
         // "-ferror-limit=20",
 
         // // Flags to DISABLE warnings -- for use with -Werror
-        // "-Wno-unused", // Disables warnings for unused variables, functions etc.
+        "-Wno-unused", // Disables warnings for unused variables, functions etc.
         // "-Wno-error=unused", // Disables warnings for unused variables, functions etc.
+    };
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Build and install a C++ library
+    //
+    const lib = b.addStaticLibrary(.{
+        .name = "factorial",
+        .target = target,
+        .optimize = .Debug,
+    });
+
+    const lib_compiler_flags = cpp_compiler_flags;
+
+    targets.append(lib) catch @panic("OOM");
+
+    lib.addCSourceFiles(.{
+        .files = &.{
+            "src/factorial.cpp",
+        },
+        .flags = &lib_compiler_flags,
+    });
+    lib.addIncludePath(b.path("include/"));
+    lib.linkLibCpp();
+
+    b.installArtifact(lib);
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Build executable
+    //
+    const exe = b.addExecutable(.{
+        .name = "prog",
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const exe_compiler_flags = cpp_compiler_flags;
+
+    targets.append(exe) catch @panic("OOM");
+
+    // Array of .c and .cpp filenames to pass to addCSourceFiles()
+    // #includes from any files listed here do not need to be added to this array
+    const exe_files = [_][]const u8{
+        "src/main.cpp",
     };
 
     // Add include paths (one path per folder containing a #include)
@@ -147,7 +151,7 @@ pub fn build(b: *std.Build) void {
     // Add .c and .cpp files along with specified compiler flags
     exe.addCSourceFiles(.{
         .files = &exe_files,
-        .flags = &exe_flags,
+        .flags = &exe_compiler_flags,
     });
 
     b.installArtifact(exe);

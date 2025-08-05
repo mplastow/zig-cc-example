@@ -8,15 +8,13 @@
 // #include <None!>
 
 // Internal dependency headers
-#include <lib.hpp>
+#include <factorial.hpp>
 
 constexpr int FACTORIAL {5};
 
-int main(/* int argc, char* argv[] */)
+auto main(/*int argc , char* argv[]*/) -> int
 {
-    // code goes here
-
-    std::println("factorial(5) = {}", lib::factorial(FACTORIAL));
+    std::println("factorial(5) = {}", fac::factorial(FACTORIAL));
 
     return 0;
 }

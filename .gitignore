@@ -27,3 +27,5 @@ zig-out/
 
 # /assets/
 # /external/
+
+compile_commands.json

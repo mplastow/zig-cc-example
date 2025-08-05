@@ -2,8 +2,8 @@
 
 // A demo library containing only factorial()
 
-// Companion header
-#include <lib.hpp>
+// Corresponding header
+#include <factorial.hpp>
 
 // C++ Standard Library
 #include <cstdint>
@@ -12,10 +12,11 @@
 // #include <None!>
 
 // Internal dependency headers
+// #include <None!>
 
-namespace lib {
+namespace fac {
 
-auto factorial(int n) -> int64_t // NOLINT
+auto factorial(int n) -> int64_t // NOLINT (No need to be warned about recursion)
 {
     if (n == 0) {
         return 1;
@@ -24,4 +25,4 @@ auto factorial(int n) -> int64_t // NOLINT
     return n * factorial(n - 1);
 }
 
-} // namespace lib
+} // namespace fac
