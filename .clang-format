@@ -27,4 +27,4 @@ FixNamespaceComments: true
 PackConstructorInitializers: Never
 ShortNamespaceLines: 3
 SortIncludes: false
-# WrapNamespaceBodyWithEmptyLines: Always # clangd-20+
+WrapNamespaceBodyWithEmptyLines: Always # clangd-20+

@@ -8,10 +8,10 @@
 // C++ Standard Library
 #include <cstdint>
 
-// External dependency headers
+// External headers
 // #include <None!>
 
-// Internal dependency headers
+// Internal headers
 // #include <None!>
 
 namespace fac {

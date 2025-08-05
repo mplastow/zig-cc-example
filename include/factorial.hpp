@@ -3,8 +3,14 @@
 #ifndef ZIGCC_FACTORIAL_HPP
 #define ZIGCC_FACTORIAL_HPP
 
-// Dependencies
+// C++ Standard Library
 #include <cstdint>
+
+// External headers
+// #include <None!>
+
+// Internal headers
+// #include <None!>
 
 namespace fac {
 

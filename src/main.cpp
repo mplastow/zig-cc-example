@@ -4,17 +4,17 @@
 #include <format>
 #include <print>
 
-// External dependency headers
+// External headers
 // #include <None!>
 
-// Internal dependency headers
+// Internal headers
 #include <factorial.hpp>
 
-constexpr int FACTORIAL {5};
+constexpr int N_FACTORIAL {5};
 
 auto main(/*int argc , char* argv[]*/) -> int
 {
-    std::println("factorial(5) = {}", fac::factorial(FACTORIAL));
+    std::println("factorial({}) = {}", N_FACTORIAL, fac::factorial(N_FACTORIAL));
 
     return 0;
 }

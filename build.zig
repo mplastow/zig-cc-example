@@ -107,8 +107,6 @@ pub fn build(b: *std.Build) void {
 
     const lib_compiler_flags = cpp_compiler_flags;
 
-    targets.append(lib) catch @panic("OOM");
-
     lib.addCSourceFiles(.{
         .files = &.{
             "src/factorial.cpp",
@@ -117,6 +115,8 @@ pub fn build(b: *std.Build) void {
     });
     lib.addIncludePath(b.path("include/"));
     lib.linkLibCpp();
+
+    targets.append(lib) catch @panic("OOM");
 
     b.installArtifact(lib);
 
@@ -131,15 +131,18 @@ pub fn build(b: *std.Build) void {
 
     const exe_compiler_flags = cpp_compiler_flags;
 
-    targets.append(exe) catch @panic("OOM");
-
     // Array of .c and .cpp filenames to pass to addCSourceFiles()
-    // #includes from any files listed here do not need to be added to this array
     const exe_files = [_][]const u8{
         "src/main.cpp",
     };
 
-    // Add include paths (one path per folder containing a #include)
+    // Add .c and .cpp files along with specified compiler flags
+    exe.addCSourceFiles(.{
+        .files = &exe_files,
+        .flags = &exe_compiler_flags,
+    });
+
+    // Add include paths (one path per folder containing an included header)
     exe.addIncludePath(b.path("include/"));
 
     // Link libraries
@@ -148,18 +151,14 @@ pub fn build(b: *std.Build) void {
     exe.linkLibrary(lib);
     // e.g. exe.linkSystemLibrary("SDL3"); // when appropriate
 
-    // Add .c and .cpp files along with specified compiler flags
-    exe.addCSourceFiles(.{
-        .files = &exe_files,
-        .flags = &exe_compiler_flags,
-    });
+    targets.append(exe) catch @panic("OOM");
 
     b.installArtifact(exe);
 
     ////////////////////////////////////////////////////////////////////////////
     // Define `ccjson` build step
     //
-    // Add a step called "ccjson" (Compile commands DataBase) for making compile_commands.json.
+    // Add a step for generating compile_commands.json for use by clangd
     // To run this step, do `zig build ccjson`
     ccjson.createStep(b, "ccjson", targets.toOwnedSlice() catch @panic("OOM"));
 
