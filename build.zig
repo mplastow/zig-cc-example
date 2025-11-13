@@ -61,7 +61,7 @@ pub fn build(b: *std.Build) !void {
         // // Sanitizers and hardeners
         // NOTE: Do not use the -fsanitize option "unsigned-integer-overflow". We should not be using unsigned integers
         //      except in situations where overflowing is desirable or mandated by the language!
-        "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG", // libc++ hardening mode. Note: possibly? inferred by zig cc from -Ox and -fsanitize=undefined flags
+        // "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG", // libc++ hardening mode. Note: possibly unnecessary: inferred(?) by zig cc from -Ox and -fsanitize=undefined
         "-fsanitize=undefined,bounds,implicit-conversion,nullability", // UB Sanitizer
         "-fsanitize-trap=undefined,bounds,implicit-conversion,nullability", // UB Sanitizer handles UB by trapping
         "-fno-omit-frame-pointer", // Must be set (along with -g) to get proper debug information in the binary. Can remove for release builds.
