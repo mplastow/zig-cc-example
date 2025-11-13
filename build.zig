@@ -3,7 +3,7 @@ const std = @import("std");
 // Generates a `compile_commands.json` in the root dir for use by clangd
 const ccjson = @import("compile_commands");
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
 
     ////////////////////////////////////////////////////////////////////////////
     // Set project options
@@ -14,7 +14,7 @@ pub fn build(b: *std.Build) void {
     });
 
     // Make a list of targets that have include files and C source files
-    var targets = std.ArrayList(*std.Build.Step.Compile).init(b.allocator);
+    var targets = std.ArrayListUnmanaged(*std.Build.Step.Compile){};
 
     // Array of clang compiler flags to pass to addCSourceFiles()
     const cpp_compiler_flags = [_][]const u8{
@@ -99,10 +99,13 @@ pub fn build(b: *std.Build) void {
     ////////////////////////////////////////////////////////////////////////////
     // Build and install a C++ library
     //
-    const lib = b.addStaticLibrary(.{
+    const lib = b.addLibrary(.{
         .name = "factorial",
-        .target = target,
-        .optimize = .Debug,
+        .linkage = .static,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+        }),
     });
 
     const lib_compiler_flags = cpp_compiler_flags;
@@ -116,7 +119,7 @@ pub fn build(b: *std.Build) void {
     lib.addIncludePath(b.path("include/"));
     lib.linkLibCpp();
 
-    targets.append(lib) catch @panic("OOM");
+    targets.append(b.allocator, lib) catch @panic("OOM");
 
     b.installArtifact(lib);
 
@@ -125,8 +128,10 @@ pub fn build(b: *std.Build) void {
     //
     const exe = b.addExecutable(.{
         .name = "prog",
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+        }),
     });
 
     const exe_compiler_flags = cpp_compiler_flags;
@@ -151,7 +156,7 @@ pub fn build(b: *std.Build) void {
     exe.linkLibrary(lib);
     // e.g. exe.linkSystemLibrary("SDL3"); // when appropriate
 
-    targets.append(exe) catch @panic("OOM");
+    targets.append(b.allocator, exe) catch @panic("OOM");
 
     b.installArtifact(exe);
 
@@ -160,7 +165,7 @@ pub fn build(b: *std.Build) void {
     //
     // Add a step for generating compile_commands.json for use by clangd
     // To run this step, do `zig build ccjson`
-    ccjson.createStep(b, "ccjson", targets.toOwnedSlice() catch @panic("OOM"));
+    _ = ccjson.createStep(b, "ccjson", targets.toOwnedSlice(b.allocator) catch @panic("OOM"));
 
     ////////////////////////////////////////////////////////////////////////////
     // Define `run` command
